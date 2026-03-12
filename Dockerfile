@@ -47,3 +47,14 @@ cat <<EOC > /root/.claude-code-router/config.json
   }
 }
 EOF
+# 5. 创建并配置 gem 用户目录，强制覆盖并复制 src 下的所有内容
+RUN mkdir -p /home/gem && chown gem:gem /home/gem
+# 清理现有文件（含隐藏文件）以确保“强制覆盖”效果
+RUN rm -rf /home/gem/* /home/gem/.[!.]* 2>/dev/null || true
+# 复制 src 内容（Docker 自动包含隐藏文件）
+COPY --chown=gem:gem src/ /home/gem/
+
+# 6. 设置入口脚本执行权限并切换用户
+RUN chmod +x /entrypoint.sh
+WORKDIR /home/gem
+USER gem
